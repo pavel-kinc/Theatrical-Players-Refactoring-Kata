@@ -7,7 +7,13 @@ namespace TheatricalPlayersRefactoringKata
     
     public class StatementPrinter
     {
-
+        public class PerfomarceResultModel
+        {
+            public string Name { get; set; }
+            public decimal Amount { get; set; }
+            public int Audience { get; set; }
+            public int VolumeCredits { get; set; }
+        }
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
             var totalAmount = 0;
