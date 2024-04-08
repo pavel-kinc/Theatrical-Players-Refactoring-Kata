@@ -11,7 +11,7 @@ namespace TheatricalPlayersRefactoringKata
         public class PerformanceResultModel
         {
             public string Name { get; set; }
-            public decimal Amount { get; set; }
+            public decimal PrintAmount => Convert.ToDecimal(PlayAmount / 100);
             public int PlayAmount { get; set; }
             public int Audience { get; set; }
             public int VolumeCredits { get; set; }
@@ -27,7 +27,7 @@ namespace TheatricalPlayersRefactoringKata
             var result = string.Format("Statement for {0}\n", invoice.Customer);
             foreach (var item in report)
             {
-                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", item.Name, item.Amount, item.Audience);
+                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", item.Name, item.PrintAmount, item.Audience);
             }
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", totalAmount);
             result += String.Format("You earned {0} credits\n", volumeCredits);
@@ -44,7 +44,6 @@ namespace TheatricalPlayersRefactoringKata
                 list.Add(new PerformanceResultModel
                 {
                     Name = play.Name,
-                    Amount = Convert.ToDecimal(thisAmount / 100),
                     PlayAmount = thisAmount,
                     Audience = perf.Audience,
                     VolumeCredits = CalculateVolumeCredits(perf, play)
