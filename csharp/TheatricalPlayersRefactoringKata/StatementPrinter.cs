@@ -12,7 +12,6 @@ namespace TheatricalPlayersRefactoringKata
         {
             public string Name { get; set; }
             public decimal Amount { get; set; }
-
             public int PlayAmount { get; set; }
             public int Audience { get; set; }
             public int VolumeCredits { get; set; }
@@ -20,17 +19,28 @@ namespace TheatricalPlayersRefactoringKata
 
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
-            var result = string.Format("Statement for {0}\n", invoice.Customer);
-            CultureInfo cultureInfo = new CultureInfo("en-US");
+            var report = GetPerformaceModels(invoice, plays);
+            var volumeCredits = report.Sum(i => i.VolumeCredits);
+            var totalAmount = Convert.ToDecimal(report.Sum(i => i.PlayAmount) / 100);
 
+            CultureInfo cultureInfo = new("en-US");
+            var result = string.Format("Statement for {0}\n", invoice.Customer);
+            foreach (var item in report)
+            {
+                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", item.Name, item.Amount, item.Audience);
+            }
+            result += String.Format(cultureInfo, "Amount owed is {0:C}\n", totalAmount);
+            result += String.Format("You earned {0} credits\n", volumeCredits);
+            return result;
+        }
+
+        private List<PerformanceResultModel> GetPerformaceModels(Invoice invoice, Dictionary<string, Play> plays)
+        {
             var list = new List<PerformanceResultModel>();
             foreach (var perf in invoice.Performances)
             {
                 var play = plays[perf.PlayID];
                 var thisAmount = CalculateAmount(perf, play);
-
-                // print line for this order
-                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(thisAmount / 100), perf.Audience);
                 list.Add(new PerformanceResultModel
                 {
                     Name = play.Name,
@@ -40,38 +50,29 @@ namespace TheatricalPlayersRefactoringKata
                     VolumeCredits = CalculateVolumeCredits(perf, play)
                 });
             }
-            var volumeCredits = list.Sum(i => i.VolumeCredits);
-            var totalAmount = list.Sum(i => i.PlayAmount);
-            result += String.Format(cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(totalAmount / 100));
-            result += String.Format("You earned {0} credits\n", volumeCredits);
-            return result;
+
+            return list;
         }
 
         private static int CalculateVolumeCredits(Performance perf, Play play)
         {
-            // add volume credits
             var volumeCredits2 = Math.Max(perf.Audience - 30, 0);
-            // add extra credit for every ten comedy attendees
-            if ("comedy" == play.Type) volumeCredits2 += (int)Math.Floor((decimal)perf.Audience / 5);
+            if ("comedy" == play.Type)
+            {
+                volumeCredits2 += (int)Math.Floor((decimal)perf.Audience / 5);
+            }
             return volumeCredits2;
         }
 
         private int CalculateAmount(Performance perf, Play play)
         {
-            int thisAmount;
-            switch (play.Type)
+            var amount = play.Type switch
             {
-                case "tragedy":
-                    thisAmount = CalculateTragedyAmount(perf);
-                    break;
-                case "comedy":
-                    thisAmount = CalculateComedyAmount(perf);
-                    break;
-                default:
-                    throw new Exception("unknown type: " + play.Type);
-            }
-
-            return thisAmount;
+                "tragedy" => CalculateTragedyAmount(perf),
+                "comedy" => CalculateComedyAmount(perf),
+                _ => throw new Exception("unknown type: " + play.Type),
+            };
+            return amount;
         }
 
         public int CalculateTragedyAmount(Performance perf)
