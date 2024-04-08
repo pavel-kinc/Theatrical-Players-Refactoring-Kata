@@ -13,24 +13,17 @@ namespace TheatricalPlayersRefactoringKata
             var result = string.Format("Statement for {0}\n", invoice.Customer);
             CultureInfo cultureInfo = new CultureInfo("en-US");
 
-            foreach(var perf in invoice.Performances) 
+            foreach (var perf in invoice.Performances)
             {
                 var play = plays[perf.PlayID];
                 var thisAmount = 0;
-                switch (play.Type) 
+                switch (play.Type)
                 {
                     case "tragedy":
-                        thisAmount = 40000;
-                        if (perf.Audience > 30) {
-                            thisAmount += 1000 * (perf.Audience - 30);
-                        }
+                        thisAmount = CalculateTragedyAmount(perf);
                         break;
                     case "comedy":
-                        thisAmount = 30000;
-                        if (perf.Audience > 20) {
-                            thisAmount += 10000 + 500 * (perf.Audience - 20);
-                        }
-                        thisAmount += 300 * perf.Audience;
+                        thisAmount = CalculateComedyAmount(perf);
                         break;
                     default:
                         throw new Exception("unknown type: " + play.Type);
@@ -47,6 +40,27 @@ namespace TheatricalPlayersRefactoringKata
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(totalAmount / 100));
             result += String.Format("You earned {0} credits\n", volumeCredits);
             return result;
+        }
+
+        public int CalculateTragedyAmount(Performance perf)
+        {
+            var amount = 40000;
+            if (perf.Audience > 30)
+            {
+                amount += 1000 * (perf.Audience - 30);
+            }
+            return amount;
+        }
+
+        public int CalculateComedyAmount(Performance perf)
+        {
+            var amount = 30000;
+            if (perf.Audience > 20)
+            {
+                amount += 10000 + 500 * (perf.Audience - 20);
+            }
+            amount += 300 * perf.Audience;
+            return amount;
         }
     }
 }
