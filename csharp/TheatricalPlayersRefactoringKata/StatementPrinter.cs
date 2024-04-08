@@ -34,6 +34,26 @@ namespace TheatricalPlayersRefactoringKata
             return result;
         }
 
+
+        public string PrintHTML(Invoice invoice, Dictionary<string, Play> plays)
+        {
+            var report = GetPerformaceModels(invoice, plays);
+            var volumeCredits = report.Sum(i => i.VolumeCredits);
+            var totalAmount = Convert.ToDecimal(report.Sum(i => i.PlayAmount) / 100);
+
+            CultureInfo cultureInfo = new("en-US");
+            var result = $"<html>\n<body>\n";
+
+            result += string.Format("<h1>Statement for {0}</h1>\n<table>\n", invoice.Customer);
+            result += "<tr><th>play</th><th>seats</th><th>cost</th></tr>\n";
+            foreach (var item in report)
+            {
+                result += String.Format(cultureInfo, "<tr><td>{0}</td><td>{2}</td><td>{1:C}</td></tr>\n", item.Name, item.PrintAmount, item.Audience);
+            }
+            result += "</table>\n</body>\n</html>";
+            return result;
+        }
+
         private List<PerformanceResultModel> GetPerformaceModels(Invoice invoice, Dictionary<string, Play> plays)
         {
             var list = new List<PerformanceResultModel>();
