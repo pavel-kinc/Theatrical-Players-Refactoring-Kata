@@ -16,18 +16,7 @@ namespace TheatricalPlayersRefactoringKata
             foreach (var perf in invoice.Performances)
             {
                 var play = plays[perf.PlayID];
-                var thisAmount = 0;
-                switch (play.Type)
-                {
-                    case "tragedy":
-                        thisAmount = CalculateTragedyAmount(perf);
-                        break;
-                    case "comedy":
-                        thisAmount = CalculateComedyAmount(perf);
-                        break;
-                    default:
-                        throw new Exception("unknown type: " + play.Type);
-                }
+                var thisAmount = CalculateAmount(perf, play);
                 // add volume credits
                 volumeCredits += Math.Max(perf.Audience - 30, 0);
                 // add extra credit for every ten comedy attendees
@@ -40,6 +29,24 @@ namespace TheatricalPlayersRefactoringKata
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(totalAmount / 100));
             result += String.Format("You earned {0} credits\n", volumeCredits);
             return result;
+        }
+
+        private int CalculateAmount(Performance perf, Play play)
+        {
+            int thisAmount;
+            switch (play.Type)
+            {
+                case "tragedy":
+                    thisAmount = CalculateTragedyAmount(perf);
+                    break;
+                case "comedy":
+                    thisAmount = CalculateComedyAmount(perf);
+                    break;
+                default:
+                    throw new Exception("unknown type: " + play.Type);
+            }
+
+            return thisAmount;
         }
 
         public int CalculateTragedyAmount(Performance perf)
